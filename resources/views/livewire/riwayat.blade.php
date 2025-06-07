@@ -84,6 +84,26 @@
 
             <template x-if="tab === 'selesai'">
                 <div class="mt-4 space-y-2 overflow-y-auto h-80">
+                    @if ($isAdmin === 1)
+                        <div class="flex space-x-4">
+                            <div class="ml-2">
+                                <label class="block text-sm font-medium text-gray-700">Start Date</label>
+                                <input type="date" wire:model="start"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                            </div>
+                            <div class="ml-2">
+                                <label class="block text-sm font-medium text-gray-700">End Date</label>
+                                <input type="date" wire:model="end"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                            </div>
+                        </div>
+                        <button
+                            wire:click="export"
+                            class="ml-2 bg-gray-500 text-white px-4 py-2 rounded"
+                        >
+                            Download
+                        </button>
+                    @endif
                 @forelse ($dataSelesai as $index => $data)
                     <div x-data="{ open: false }" class="bg-gray-100 rounded-xl px-4 py-3">
                         <div class="flex justify-between items-center cursor-pointer" @click="open = !open">
