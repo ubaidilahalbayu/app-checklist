@@ -13,18 +13,19 @@ class ApcChecklist extends Component
 {
     use WithFileUploads;
     public $items = [
-        'Helem Safety',
+        'Helm Safety',
         'Pelindung Mata',
         'Masker',
         'Pelindung Telinga',
         'Sarung Tangan',
-        'Rompi Keselamatan',
+        'Rompi Safety',
         'Sepatu Safety'
     ];
     public $checked = [];
     public $photo;
     public $photoPreviewUrl = null;
     public $sudahChecklist;
+    public $sesi;
 
     public function proses()
     {
@@ -42,12 +43,18 @@ class ApcChecklist extends Component
         $this->photoPreviewUrl = $this->photo->temporaryUrl();
     }
 
-    public function save()
+    public function save($base64Image)
     {
         $now = Carbon::now('Asia/Jakarta');
         $tanggal = $now->format('Y-m-d');
         $jam = $now->format('H:i:s');
-        $path = $this->photo->store('checklist_photos', 'public');
+        // Hilangkan header "data:image/png;base64,"
+        $image = str_replace('data:image/png;base64,', '', $base64Image);
+        $image = str_replace(' ', '+', $image);
+        $filename = 'foto_checklist_' . auth()->id() . '_' . time() . '.png';
+        $path = "checklist_photos/" . $filename;
+
+        Storage::disk('public')->put("checklist_photos/{$filename}", base64_decode($image));
 
         try{
             ChecklistUser::create([
@@ -73,9 +80,19 @@ class ApcChecklist extends Component
     {
         $now = Carbon::now('Asia/Jakarta');
         $tanggal = $now->format('Y-m-d');
-        $this->sudahChecklist = ChecklistUser::where('user', auth()->id())
-            ->where('tanggal', $tanggal)
-            ->exists();
+        $jam = $now->format('H:i:s');
+        $this->sesi = strtotime($jam) > strtotime("12:00:00") ? 2 : 1;
+        if ($this->sesi == 1) {
+            $this->sudahChecklist = ChecklistUser::where('user', auth()->id())
+                ->where('tanggal', $tanggal)
+                ->whereBetween('jam', ['06:00:00', '12:00:00'])
+                ->exists();
+        }else{
+            $this->sudahChecklist = ChecklistUser::where('user', auth()->id())
+                ->where('tanggal', $tanggal)
+                ->whereBetween('jam', ['12:00:01', '18:00:00'])
+                ->exists();
+        }
     }
     public function render()
     {

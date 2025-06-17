@@ -37,7 +37,7 @@ class Riwayat extends Component
         $now = Carbon::now('Asia/Jakarta');
         $tanggal = $now->format('Y-m-d');
 
-        $dataBerlangsung = User::select(['users.id', 'users.name', 'users.email', 'checklist_user.*', DB::raw("IF(checklist_user.tanggal IS NOT NULL, 1, 0) AS sudah"), DB::raw("CONCAT('".Storage::url('')."', checklist_user.photo) AS photo_url")])
+        $dataBerlangsung = User::select(['users.id', 'users.name', 'users.email', 'checklist_user.*', DB::raw("CASE WHEN checklist_user.tanggal IS NOT NULL THEN 1  ELSE 0 END AS sudah"), DB::raw("'".Storage::url('')."' || checklist_user.photo AS photo_url")])
         ->leftJoin('checklist_user', function ($join) use ($tanggal) {
             $join->on('checklist_user.user', '=', 'users.id')
                 ->where('checklist_user.tanggal', '=', $tanggal);
@@ -45,7 +45,7 @@ class Riwayat extends Component
 
         $dataSelesai = ChecklistUser::select(['checklist_user.*', 'users.id', 'users.name', 'users.email'])->join('users', 'users.id', '=', 'checklist_user.user')->orderBy('checklist_user.tanggal', 'desc')->orderBy('checklist_user.jam', 'asc')->where('users.id', auth()->id())->paginate(10);
         if ($this->isAdmin === 1) {
-            $dataBerlangsung = User::select(['users.id', 'users.name', 'users.email', 'checklist_user.*', DB::raw("IF(checklist_user.tanggal IS NOT NULL, 1, 0) AS sudah"), DB::raw("CONCAT('".Storage::url('')."', checklist_user.photo) AS photo_url")])
+            $dataBerlangsung = User::select(['users.id', 'users.name', 'users.email', 'checklist_user.*', DB::raw("CASE WHEN checklist_user.tanggal IS NOT NULL THEN 1 ELSE 0 END AS sudah"), DB::raw("'".Storage::url('')."' || checklist_user.photo AS photo_url")])
             ->leftJoin('checklist_user', function ($join) use ($tanggal) {
                 $join->on('checklist_user.user', '=', 'users.id')
                     ->where('checklist_user.tanggal', '=', $tanggal);

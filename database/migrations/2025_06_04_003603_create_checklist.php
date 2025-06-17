@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('photo');
 
             $table->timestamps();
-            $table->primary(['user', 'tanggal']);
+            $table->primary(['user', 'tanggal', 'jam']);
             $table->foreign('user')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
         });
     }
